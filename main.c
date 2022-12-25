@@ -5,13 +5,13 @@
 
 const int LINE = 21; // размеры поля по y
 const int COL = 50; // размеры поля по x
-const int SPEED_PL = 4; // скорость каретки
+const int SPEED_PL = 2; // скорость каретки
 const int BALL_SPEED = 10; //скорость мяча
 
 void start_display(char screen[LINE][COL]);
 void show_display(char screen[LINE][COL], int score, int time_m, int time_s);
 int move_roket(char screen[LINE][COL], int x,  char key);
-void ball(char *pflag, char *psides, int *pmx ,int *pmy);
+void ball(char *pflag, char *psides, int *pmx ,int *pmy, int xr);
 void game_time(int *ptime_m, int *ptime_s);
 void game_score(int *pscore, int mx, int my, int xr);
 
@@ -40,9 +40,10 @@ int main()
     timeout(10);
     stdscr = initscr();
     keypad(stdscr,true);
+
     start_display(mass);
     mass[LINE-2][xr] = '-'; mass[LINE-2][xr+1] = '-'; mass[LINE-2][xr+2] = '-'; mass[LINE-2][xr+3] = '-';
-    if (ball_box == BALL_SPEED) {ball(&flag, &sides, &mx, &my); ball_box = 0;}
+    if (ball_box == BALL_SPEED) {ball(&flag, &sides, &mx, &my, xr); ball_box = 0;}
     ball_box++;
     mass[my][mx] = '*';
     game_time(&time_m, &time_s);
@@ -60,7 +61,7 @@ int main()
     endwin();
     return 0;
 }
-void ball(char *pflag, char *psides, int *pmx , int *pmy)
+void ball(char *pflag, char *psides, int *pmx , int *pmy, int xr)
 {
     if ((*pflag) == 'h' && (*psides) == 'r')
     {if((*pmx)<COL-2 && (*pmy)>1){(*pmx)++; (*pmy)--;} else if((*pmy) == 1 && (*pmx) < COL-2) {(*pflag) = 'l'; (*psides) = 'r';} else {(*pflag) = 'h'; (*psides) = 'l';}}
@@ -69,10 +70,28 @@ void ball(char *pflag, char *psides, int *pmx , int *pmy)
     {if((*pmx)>1 && (*pmy)>1){(*pmx)--; (*pmy)--;} else if((*pmy) == 1 && (*pmx) > 1) {(*pflag) = 'l'; (*psides) = 'l';} else {(*pflag) = 'h'; (*psides) = 'r';}}
 
     else if ((*pflag) == 'l' && (*psides) == 'r')
-    {if((*pmx)<COL-2 && (*pmy)<LINE-2){(*pmx)++; (*pmy)++;} else if((*pmy) == LINE-2 && (*pmx) < COL-2) {(*pflag) = 'h'; (*psides) = 'r';} else {(*pflag) = 'l'; (*psides) = 'l';}}
-
+    // полет мяча вниз в рамках поля не задевая стен /
+    {if((*pmx)<COL-2 && (*pmy)<LINE-2){(*pmx)++; (*pmy)++;}
+    // уход мяча в створ ворот
+     else if((*pmy) == LINE-2 && (*pmx) < COL-2 && (*pmx)!= xr && (*pmx)!= xr+1 && (*pmx)!= xr+2 && (*pmx)!= xr+3) {(*pmx) = 2; (*pmy = 2);}
+    // мяч попал в платформу 1 2
+     else if((*pmy) == LINE-2 && (*pmx) < COL-2 && (*pmx) == xr || (*pmx) == xr+1 && (*pmx)!= xr+2 && (*pmx)!= xr+3) {(*pflag) = 'h'; (*psides) = 'l';}
+    // мяч попал в платформу 3 4
+     else if((*pmy) == LINE-2 && (*pmx) < COL-2 && (*pmx) != xr && (*pmx) != xr+1 && (*pmx)== xr+2 || (*pmx)== xr+3) {(*pflag) = 'h'; (*psides) = 'r';}
+     else {(*pflag) = 'l'; (*psides) = 'l';}
+    }
     else if ((*pflag) == 'l' && (*psides) == 'l')
-    {if((*pmx) > 1 && (*pmy)<LINE-2){(*pmx)--; (*pmy)++;} else if((*pmy) == LINE-2 && (*pmx) > 1) {(*pflag) = 'h'; (*psides) = 'l';} else {(*pflag) = 'l'; (*psides) = 'r';}}
+    // полет мяча вниз в рамках поля не задевая стен /
+    {if((*pmx) > 1 && (*pmy) < LINE-2){(*pmx)--; (*pmy)++;}
+    // уход мяча в створ ворот
+     else if((*pmy) == LINE-2 && (*pmx) > 1 && (*pmx)!= xr && (*pmx)!= xr+1 && (*pmx)!= xr+2 && (*pmx)!= xr+3) {(*pmx) = 2; (*pmy = 2);}
+    // мяч попал в платформу 1 2
+     else if((*pmy) == LINE-2 && (*pmx) > 1 && (*pmx) == xr || (*pmx) == xr+1 && (*pmx)!= xr+2 && (*pmx)!= xr+3) {(*pflag) = 'h'; (*psides) = 'r';}
+    // мяч попал в платформу 3 4
+     else if((*pmy) == LINE-2 && (*pmx) > 1 && (*pmx) != xr && (*pmx) != xr+1 && (*pmx)== xr+2 || (*pmx)== xr+3) {(*pflag) = 'h'; (*psides) = 'l';}
+
+     else if((*pmy) != LINE-2 && (*pmx) == 1) {(*pflag) = 'l'; (*psides) = 'r';}
+     else {(*pflag) = 'h'; (*psides) = 'r';}}
 
 }
 
