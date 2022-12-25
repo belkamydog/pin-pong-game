@@ -13,6 +13,8 @@ void show_display(char screen[LINE][COL], int score, int time_m, int time_s);
 int move_roket(char screen[LINE][COL], int x,  char key);
 void ball(char *pflag, char *psides, int *pmx ,int *pmy);
 void game_time(int *ptime_m, int *ptime_s);
+void game_score(int *pscore, int mx, int my, int xr);
+
 
 int main()
 {
@@ -31,12 +33,11 @@ int main()
     printf("Hellow dear User!\nIt's a Pin-Pong-Game\nInput 's' for start new game or input q for out\nUse key_left or key_right to move platform\n");
     printf("Input your choice and press enter: ");
     scanf("%c", &key);
+    noecho();
 
     while (key != 'q')
     {
     timeout(10);
-    noecho();
-    cbreak();
     stdscr = initscr();
     keypad(stdscr,true);
     start_display(mass);
@@ -45,12 +46,16 @@ int main()
     ball_box++;
     mass[my][mx] = '*';
     game_time(&time_m, &time_s);
+
+    game_score(&score, mx, my, xr);
+
     show_display(mass, score, time_m, time_s);
-    doupdate();
+
     key = wgetch(stdscr);
     move_roket(mass, xr, key);
-    clear();
+
     xr = move_roket(mass, xr, key);
+    clear();
     }
     endwin();
     return 0;
@@ -112,4 +117,11 @@ void game_time(int *ptime_m, int *ptime_s)
     int total_sek = ms / 100000;
     (*ptime_m) = total_sek / 60;
     (*ptime_s) = total_sek % 60;
+}
+
+void game_score(int *pscore, int mx, int my, int xr)
+{
+    if ((mx == xr || mx == xr+1 || mx == xr+2 || mx == xr+3) && my == (LINE-2))
+    (*pscore)++;
+    else if ((mx != xr || mx != xr+1 || mx != xr+2 || mx != xr+3) && my == (LINE-2)) (*pscore) = 0;
 }
